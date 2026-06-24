@@ -26,9 +26,11 @@ You are building a FarmwiseAI product. Follow these rules on every UI, build, or
 
 4. **Hard guardrails (anti-slop).** No second brand accent color. No purple/blue *gradients* (solid blues like Harbor are fine). No Inter/Roboto/Arial as a primary face. No grid of identical cards as a layout. No emoji (including as icons — use a real icon set). No pill-shaped chips for content (use rounded rectangles). No left/top accent strokes on cards. No thin colored outlines on info cards. No raising the drop shadow on hover.
 
-5. **Verify before you call it done.** After any UI work, run the visual-feedback loop (see §10): screenshot the result with the Playwright screenshot-inspector skill, audit it against the relevant sections of this file (color, type, depth, motion, anti-slop, accessibility), fix what fails, and re-verify.
+5. **KPI cards get generated illustrations.** Whenever you build KPI / metric cards, also generate their object-driven SVG illustrations at dev time using the `svg-design` skill and the fixed prompt + recipe in §6 ("KPI / metric card illustrations"), coloured strictly from the 6 `--kpi-*` tokens. This is part of building the cards, not an optional extra.
 
-6. **Persist project-specific decisions.** Org-wide rules live here. Anything specific to *this* project (chosen theme, new component patterns, project tokens) is recorded by the Interface Design skill in `.interface-design/system.md` so it holds across sessions. This file = org rules; that file = this project's extensions.
+6. **Verify before you call it done.** After any UI work, run the visual-feedback loop (see §10): screenshot the result with the Playwright screenshot-inspector skill, audit it against the relevant sections of this file (color, type, depth, motion, anti-slop, accessibility), fix what fails, and re-verify.
+
+7. **Persist project-specific decisions.** Org-wide rules live here. Anything specific to *this* project (chosen theme, new component patterns, project tokens) is recorded by the Interface Design skill in `.interface-design/system.md` so it holds across sessions. This file = org rules; that file = this project's extensions.
 
 ---
 
@@ -183,6 +185,7 @@ Headings use `letter-spacing: -0.02em`. The smallest token is `--text-sm` (13px)
 - **Edge gap (`--space-edge`, 12px):** floating panels (sidebar, overlays) sit 12–14px from the viewport/parent edges — never flush.
 - **Floating-card paradigm:** primary navigation and overlays are detached rounded cards with `--shadow-card` / `--shadow-float`, not docked panels. The sidebar floats on the left with the edge gap.
 - **Generous whitespace:** prefer `--space-6`/`--space-8` between sections; let layouts breathe.
+- **Contained width (don't span edge-to-edge):** the main content sits in a centered max-width container — `max-width: var(--content-max)` (1320px), `margin-inline: auto`. On wide monitors content caps and leaves balanced whitespace on both sides; as the viewport narrows the container shrinks fluidly to fill. Never let content stretch the full width of a wide screen. (In an app with a sidebar, cap and center the content region to the right of the sidebar.)
 - **Layout, not card-soup:** do **not** default to a grid of identical equal cards. Build real hierarchy — a lead region + supporting modules, varied card sizes, asymmetry where it helps. Use `minmax(0, 1fr)` grids to avoid overflow.
 
 ---
@@ -193,12 +196,20 @@ All components consume the semantic tokens and shared structural tokens. Pattern
 
 **Buttons**
 - Radius `--radius-button` (12px); padding ~`9px 16px`; `--font-body` 600.
-- Primary: `--accent` bg, `--on-accent` text, resting `--shadow-sm`. Hover: `--accent-hover` (or `brightness(.94)`) + `scale(1.02)`. Active: `scale(.97) translateY(1px)`. Shadow does **not** grow.
-- Ghost/secondary: `--surface` bg, `--text-primary`, `--shadow-sm`. Hover: `--surface-muted` + `scale(1.02)`.
+- Primary: `--accent` bg, `--on-accent` text, resting `--shadow-sm`. Hover: `--accent-hover` (or `brightness(.94)`) — **color change only, no scale**. Active: `scale(.97) translateY(1px)` (the pressed feel). Shadow does **not** grow.
+- Ghost/secondary: `--surface` bg, `--text-primary`, `--shadow-sm`. Hover: `--surface-muted` (color only). Active: pressed.
 
-**Inputs / selects / sliders**
+**Inputs / sliders**
 - Radius `--radius-control` (10px); `--surface-muted` field bg; focus ring `--focus-ring`.
 - Checkboxes, radios, range sliders: `accent-color: var(--accent)`.
+
+**Search inputs — bounded width**
+- A search field has `min-width: var(--search-min)` (240px) and `max-width: var(--search-max)` (420px). **Never let it flex to fill the whole container** (it looks unbalanced and un-modern). At default width the placeholder shows in full; it may truncate only if the viewport forces the field below its min. In a flex row, pair it with a flexible spacer so trailing actions sit at the far edge.
+
+**Selects & dropdowns — ONE pattern, no exceptions**
+- Every select, dropdown, and menu (filters, table column menus, form selects) uses the **same custom popover component** — see the reference implementation in the skill (`Select` / `MultiSelect` / `Popover`). The popover is a floating card (`--radius-overlay`, `--shadow-float`) with token-styled options.
+- **Never use a bare native `<select>`** for filters, menus, or form fields — its option list is unstyled by the browser and breaks the design language. **Never mix native and custom controls** in the same screen (the most common consistency failure).
+- A field-style select (in forms) uses the `--surface-muted` field trigger; a filter-style select uses the `--surface` + `--shadow-sm` button trigger that tints to `--accent-soft`/`--accent-text` when active/open.
 
 **Chips / badges** (predefined-value fields like status, crop, tags)
 - Rounded **rectangles**, `--radius-chip` (8px) — **never full pills for content**.
@@ -211,16 +222,29 @@ All components consume the semantic tokens and shared structural tokens. Pattern
 - `--surface` bg, `--radius-card` (16px), `--shadow-card`. No left/top accent stroke; no thin colored outline. Floating panels use `--radius-panel` (20px) + `--shadow-float`.
 
 **Sidebar (floating nav)**
-- Floating card, edge gap `--space-edge`. Items: radius ~11px, `--text-secondary`. Hover: `--surface-muted` + `scale(1.02)`. Active: `--accent-soft` bg + `--accent-text`, with an accent dot.
+- Floating card, edge gap `--space-edge`. Items: radius ~11px, `--text-secondary`. Hover: `--surface-muted` (color only, no scale). Active: `--accent-soft` bg + `--accent-text`, with an accent dot.
 
 **Filter strip + dropdowns**
 - Horizontal row of filter buttons (`--surface`, `--shadow-sm`, radius 12). Open state tints to `--accent-soft`/`--accent-text` and rotates the chevron. Active selections show a count badge (`--accent` fill, Geist).
-- Popover = floating card (`--radius-overlay` 16px, `--shadow-float`), entrance via `--ease-spring`. Holds the appropriate input type per filter: **checkboxes**, **multi-select checkboxes** (optionally with search), **radio buttons**, **sliders**. Each popover offers Reset / Done.
+- Popover = floating card (`--radius-overlay` 16px, `--shadow-float`), entrance via the **gentle spring** (`pop-spring` keyframe, `--dur-pop` 480ms — a slow, soft overshoot, not a snap). Holds the appropriate input type per filter: **checkboxes**, **multi-select checkboxes** (optionally with search), **radio buttons**, **sliders**. Each popover offers Reset / Done.
+
+**Charts (recharts)**
+- Bars: with few categories, **widen the bars to minimize the gaps** — set `barCategoryGap="20%"` and **do not cap with a small `maxBarSize`** (a small cap reintroduces big gaps on wide charts). Target: each bar reads at least as wide as the gap beside it. Radius `[6,6,0,0]`, fill `--accent`.
+- Axes/grid: ticks `--text-muted`, grid lines `--border` (horizontal only), no axis lines where avoidable. Series color `--accent`; multi-series/status use semantic tokens. Tooltip = `--surface` card, `--shadow-float`, `--radius-lg`.
 
 **Data table** (Linear/Notion-grade — the standard pattern)
 - `--surface` card, header row in `--text-muted` overline style on a `--border` divider; body rows `--text-sm`, `--surface-muted` row hover.
 - Required features: **sort** (click header, direction arrow; sort enums by rank not alphabetically), **group by** (collapsible group header rows; pagination off while grouped), **resizable columns** (drag header edge), **show/hide columns** and **add column** (Columns menu), **pagination** (page-size select + prev/next + "1–N of M").
 - **Field-aware cells:** text; numeric → Geist tabular; predefined set → chip; status → semantic chip; severity → icon+color+label; ratio/score (e.g. NDVI) → mini progress bar (`--surface-muted` track, `--accent` fill) + Geist value.
+
+**KPI / metric card illustrations (generated, object-driven)**
+- Every KPI / metric card gets a bespoke **SVG illustration** filling its **right ~55–58%**, bleeding to the bottom and right edges (`preserveAspectRatio="xMidYMax slice"`). Text (label / value / delta) stays on the left, above the art (`position:relative; z-index`).
+- **Generate it at dev time with the `svg-design` skill** (invoke it), using this exact brief **every time**:
+  > Modern enterprise SaaS dashboard KPI card illustration, premium 2.5D vector artwork, large cropped composition, illustration fills entire right half of card, touches bottom edge and right edge, only partial scene visible, object-driven (no human characters or faces), soft gradients, subtle grain texture, ambient occlusion shadows, layered depth, oversized foreground elements, floating UI widgets, abstract organic shapes, premium fintech aesthetic, Stripe + Linear + Ramp + Brex + Figma illustration style, highly polished product-design showcase, minimal color palette, clean white background, modern B2B software design language, editorial vector art, sophisticated lighting, dashboard-ready, dribbble quality, design-system friendly.
+- **Object-driven only — never human characters or faces.** The motif is the metric's subject (e.g. parcels/boxes for shipments, a clock + check for on-time, a route map + pin for transit, an alert triangle for exceptions).
+- **Recipe — every illustration has all of:** (1) 2–3 layered light **organic blobs** in the card's KPI colour (radial + linear gradients); (2) an **oversized foreground object**, rendered 2.5D with top/side faces for depth; (3) a **floating UI widget** (small rounded white card / pill / chip); (4) **ambient shadows** — `feDropShadow` on objects + a faint ground ellipse; (5) a subtle **grain** overlay (`feTurbulence` fractalNoise, ~5% alpha, full-bleed `<rect>`); (6) soft gradient shading throughout.
+- **Colour: strictly from the 6 KPI tokens** — `--kpi-{blue|green|purple|amber|teal|rose}` (each with `-bg` / `-soft` / base / `-deep`; see §11). Pick **one** KPI colour per card — by the metric's meaning where it maps (positive→green, caution→amber, alert→rose, neutral→blue/purple/teal) or for variety otherwise. **Never use a hue outside these 6.** White widgets use `--surface`; SVG fills/stops reference the tokens via `var(--kpi-…)`.
+- Authoring in inline SVG: scope all gradient/filter `id`s per card (collisions across inline SVGs render wrong); `role="img"` + `aria-label` describing the scene.
 
 ---
 
@@ -246,15 +270,16 @@ Layered, soft, multi-stop shadows. **Shadows never grow on hover.**
 |---|---|---|
 | `--ease-standard` | `cubic-bezier(.2,.7,.3,1)` | Default for everything — all hover/press, color and transform transitions. Use unless an entrance specifically calls for spring. |
 | `--ease-spring` | `cubic-bezier(.34,1.56,.64,1)` | Overlay / popover / menu **entrances** only, used sparingly. Never on hover or press (it overshoots and feels "off"). |
-| `--dur-fast` | `120ms` | Transform changes: hover `scale(1.02)`, press `scale(.96)`, and other micro-interactions that must feel instant. |
-| `--dur` | `160ms` | Color / background / opacity / border changes; the default for most state transitions. |
-| `--dur-slow` | `240ms` | Larger movements: overlay enter/exit, panel slide, expand / collapse, group-row toggle. |
+| `--dur-fast` | `120ms` | The press transform (`scale(.96)`) and other micro-interactions that must feel instant. |
+| `--dur` | `160ms` | Color / background / opacity / border changes — the default, and **all** hover feedback. |
+| `--dur-slow` | `240ms` | Larger movements: panel slide, expand / collapse, group-row toggle. |
+| `--dur-pop` | `480ms` | Dropdown / menu / popover **entrance** (gentle spring). Deliberately slow + soft. |
 
 **Hover/press feel (the house style):**
-- **Hover:** color shift (background/accent) + a very slight `scale(1.02)`. **Do not increase the drop shadow.**
-- **Press (`:active`):** presses down — `scale(.96) translateY(1px)` — so clicks feel physical.
-- Transition `transform` with `--ease-standard` at `--dur-fast`; transition color/background at `--dur`.
-- Reserve `--ease-spring` for popover/overlay entrances. Respect `prefers-reduced-motion`.
+- **Hover = colour/highlight change ONLY — never scale.** Scaling an element drags its label text and reads as a glitch; growing padding shifts neighbours. So hover only shifts `background`/`color`/`accent`. **Do not increase the drop shadow.**
+- **Press (`:active`):** presses down — `scale(.96) translateY(1px)` — so clicks feel physical. (This brief scale on the text is fine; it reads as "pressed.")
+- **Dropdown/menu/popover entrance:** the `pop-spring` keyframe over `--dur-pop` (480ms) — a gentle overshoot-and-settle, not a snap. (`--ease-spring` remains available for other one-off entrances; never use it on hover/press.)
+- Respect `prefers-reduced-motion` (drop the press transform and the entrance animation).
 
 ---
 
@@ -278,6 +303,17 @@ Layered, soft, multi-stop shadows. **Shadows never grow on hover.**
 - ❌ Thin colored outlines on info cards.
 - ❌ Growing the drop shadow on hover.
 - ❌ Hardcoded hex/px in components.
+- ❌ A bare native `<select>` for filters, menus, or form fields — use the shared dropdown component.
+- ❌ Mixing native and custom form controls in the same screen (e.g. one custom popover next to three native selects).
+- ❌ Content that spans edge-to-edge on a wide monitor — use the centered `--content-max` container.
+- ❌ Scaling anything on hover — hover changes colour/highlight only; the scale belongs to the pressed/active state.
+- ❌ A search input that flexes to full container width — bound it with `--search-min` / `--search-max`.
+- ❌ Default browser scrollbars — use the thin, subtle, track-less accent-tinted scrollbar.
+- ❌ Bar charts with a small `maxBarSize` that leaves big gaps between few bars — widen bars via `barCategoryGap`.
+- ❌ Human characters or faces in KPI illustrations — object-driven only.
+- ❌ KPI illustration colours outside the 6 `--kpi-*` tokens.
+
+> **KPI palette exception:** the 6-colour KPI illustration palette is the *one* sanctioned multi-hue set. It applies **only** inside KPI-card illustrations (their blobs + objects) — never to UI chrome, buttons, links, charts, or general accent. The single-accent rule governs everything else.
 
 ---
 
@@ -291,8 +327,11 @@ Layered, soft, multi-stop shadows. **Shadows never grow on hover.**
 **Visual-feedback loop (run after any UI work, before "done"):**
 1. Screenshot the running UI with the Playwright **screenshot-inspector** skill.
 2. Audit the screenshot against §2 (theme/color), §4 (type), §6 (components), §7 (depth), §8 (motion/hover), §9 (anti-slop), §10 (a11y).
-3. Fix every failure, then re-screenshot and re-verify.
-4. Record any project-specific decisions in `.interface-design/system.md` (project extensions), keeping this file as the org-wide source of truth.
+3. **Consistency checklist (the things that slip):** every dropdown/select/menu uses the one shared component — zero native `<select>` elements, and one dropdown looks identical to the next; content sits inside the centered `--content-max` container (not edge-to-edge); search inputs are width-bounded (not full-width); scrollbars are the thin custom ones (no default browser bars); hover changes colour only (nothing scales on hover); dropdowns open with the gentle 480ms spring; bars are wide with small gaps; chips are rounded rects, not pills; shadows don't grow on hover.
+4. Fix every failure, then re-screenshot and re-verify.
+5. Record any project-specific decisions in `.interface-design/system.md` (project extensions), keeping this file as the org-wide source of truth.
+
+> Reference component implementations (Select, MultiSelect, Popover, Chip, Modal, Table) live in the `farmwiseai-brand-guidelines` skill — copy those rather than improvising each control, which is how inconsistencies (mixed native/custom dropdowns) creep in.
 
 ---
 
@@ -315,10 +354,12 @@ Layered, soft, multi-stop shadows. **Shadows never grow on hover.**
   --text-sm: 0.8125rem;      --lh-sm: 1.5;
   --text-overline: 0.6875rem;--lh-overline: 1.4;
 
-  /* spacing */
+  /* spacing & layout */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
   --space-12: 48px; --space-16: 64px; --space-edge: 12px;
+  --content-max: 1320px; /* centered max-width for main content — never span edge-to-edge */
+  --search-min: 240px; --search-max: 420px; /* search inputs are width-bounded, never full-width */
 
   /* radii */
   --radius-chip: 8px;    --radius-control: 10px; --radius-button: 12px;
@@ -340,7 +381,17 @@ Layered, soft, multi-stop shadows. **Shadows never grow on hover.**
   /* motion */
   --ease-standard: cubic-bezier(.2,.7,.3,1);
   --ease-spring: cubic-bezier(.34,1.56,.64,1);
-  --dur-fast: 120ms; --dur: 160ms; --dur-slow: 240ms;
+  --dur-fast: 120ms; --dur: 160ms; --dur-slow: 240ms; --dur-pop: 480ms;
+
+  /* KPI illustration palette — 6 fixed hues, theme-independent, ILLUSTRATION-ONLY
+     (the one sanctioned multi-hue exception; decorative, not bound by text-contrast AA).
+     Each: -bg (blob/background tint) · -soft (mid blob) · base (object) · -deep (object side / shadow). */
+  --kpi-blue-bg:#EEF3FF;   --kpi-blue-soft:#C2D2FF;   --kpi-blue:#5470F0;   --kpi-blue-deep:#3B53C9;
+  --kpi-green-bg:#ECFAF1;  --kpi-green-soft:#BFE9CE;  --kpi-green:#2FA45F;  --kpi-green-deep:#1F7D47;
+  --kpi-purple-bg:#F3EFFF; --kpi-purple-soft:#D6CBFB; --kpi-purple:#7A5AF0; --kpi-purple-deep:#5B3FD6;
+  --kpi-amber-bg:#FFF6E6;  --kpi-amber-soft:#FAD79A;  --kpi-amber:#F2A516;  --kpi-amber-deep:#C9790A;
+  --kpi-teal-bg:#E6F7F6;   --kpi-teal-soft:#B6E6E2;   --kpi-teal:#14A89B;   --kpi-teal-deep:#0C7D73;
+  --kpi-rose-bg:#FDEEF1;   --kpi-rose-soft:#F8C8D3;   --kpi-rose:#E85C7F;   --kpi-rose-deep:#C23A5E;
 }
 
 /* ---- Theme: Meridian (default) ---- */
@@ -396,6 +447,38 @@ Layered, soft, multi-stop shadows. **Shadows never grow on hover.**
   --accent:#1F2329; --accent-hover:#0E1115; --accent-text:#1F2329; --accent-soft:#E9EAEC; --on-accent:#FFFFFF;
   --success:#157F54; --success-soft:#E0F1E9; --warning:#8A5D0C; --warning-soft:#F4ECD5;
   --error:#C0392B; --error-soft:#F8E4E1; --info:#2C6FB0; --info-soft:#E2EDF8;
+}
+
+/* ---- Global base: scrollbar + interaction + popover entrance ---- */
+
+/* Thin, subtle scrollbars — no track, no buttons, rounded ends, light accent tint */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 35%, transparent) transparent; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Interaction: hover = colour only (no scale); press = pressed feel. Apply .press to interactive elements. */
+.press {
+  transition: background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard),
+    border-color var(--dur) var(--ease-standard), filter var(--dur) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
+}
+.press:active { transform: scale(.97) translateY(1px); }
+
+/* Dropdown / menu / popover entrance — gentle spring (overshoot then settle). Apply .pop-enter to the panel. */
+@keyframes pop-spring {
+  0%   { opacity: 0; transform: translateY(-6px) scale(.96); }
+  60%  { opacity: 1; transform: translateY(0) scale(1.012); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.pop-enter { transform-origin: top center; animation: pop-spring var(--dur-pop) var(--ease-standard) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .press:active { transform: none; }
+  .pop-enter { animation: none; }
 }
 ```
 

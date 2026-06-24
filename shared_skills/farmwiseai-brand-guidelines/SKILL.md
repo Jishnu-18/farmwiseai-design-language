@@ -59,18 +59,23 @@ Never set running text below 13px. Sentence case for UI labels.
 
 - Scale (4px base): `--space-1..16` (4/8/12/16/20/24/32/40/48/64). Edge gap `--space-edge` 12px.
 - **Floating-card paradigm:** nav and overlays are detached, rounded, softly shadowed cards sitting 12–14px from edges — never docked flush. The sidebar floats.
+- **Contained width:** main content sits in a centered max-width container — `max-width: var(--content-max)` (1320px), `margin-inline: auto`. Caps on wide monitors with balanced whitespace both sides; shrinks fluidly when narrow. **Never span content edge-to-edge.** With a sidebar, cap and center the content region to the right of it.
 - Generous whitespace; **no grid of identical equal cards** — build real hierarchy and varied sizes. Use `minmax(0,1fr)` grids.
 
 ## Components (constant across themes)
 
-- **Buttons** — radius `--radius-button` (12px). Primary: `--accent` bg / `--on-accent` text / `--shadow-sm`. Ghost: `--surface` / `--text-primary`.
+- **Buttons** — radius `--radius-button` (12px). Primary: `--accent` bg / `--on-accent` text / `--shadow-sm`. Ghost: `--surface` / `--text-primary`. Hover = colour only (no scale); active = `scale(.97) translateY(1px)`.
 - **Inputs/sliders/checkboxes/radios** — radius `--radius-control` (10px), `--surface-muted` field, `accent-color: var(--accent)`, focus `--focus-ring`.
+- **Search inputs — bounded width:** `min-width: var(--search-min)` (240px), `max-width: var(--search-max)` (420px). **Never flex to full container width.** Placeholder shows fully at default; truncates only if forced below min. Pair with a flexible spacer to push trailing actions to the edge.
+- **Selects & dropdowns — ONE pattern:** every select/dropdown/menu (filters, column menus, form selects) uses the **same custom popover component** (see Reference components: `Select`/`MultiSelect`/`Popover`). **Never a bare native `<select>`** (its option list is unstyled and breaks the system); **never mix native and custom controls** in one screen. Field-style trigger = `--surface-muted`; filter-style trigger = `--surface` + `--shadow-sm`, tinting to `--accent-soft`/`--accent-text` when active.
 - **Chips/badges** — rounded **rectangles** `--radius-chip` (8px), **never pills for content**. Soft tinted fill + same-hue darker text; semantic chips use `--success-soft`/`--success` etc. No thin colored outline.
 - **Severity / enum-with-meaning** — icon + color + label: tinted rounded square + themed icon + label. critical→`--error` (alert), high→`--warning` (chevrons-up), medium→`--info` (equals), low→`--success` (chevron-down).
 - **Cards/panels** — `--surface`, `--radius-card` (16px), `--shadow-card`. No left/top accent stroke, no thin colored outline. Floating panels: `--radius-panel` (20px) + `--shadow-float`.
-- **Sidebar** — floating card, edge gap. Active item: `--accent-soft` bg + `--accent-text` + accent dot.
-- **Filter strip + dropdowns** — horizontal filter buttons; open tints to `--accent-soft`/`--accent-text`; active count badge. Popover = floating card (`--radius-overlay`, `--shadow-float`), spring entrance; holds checkboxes / multi-select (optionally searchable) / radios / sliders.
+- **Sidebar** — floating card, edge gap. Hover = `--surface-muted` (color only). Active item: `--accent-soft` bg + `--accent-text` + accent dot.
+- **Filter strip + dropdowns** — horizontal filter buttons; open tints to `--accent-soft`/`--accent-text`; active count badge. Popover = floating card (`--radius-overlay`, `--shadow-float`), **gentle-spring entrance** (`pop-spring`, `--dur-pop` 480ms); holds checkboxes / multi-select (optionally searchable) / radios / sliders.
+- **Charts (recharts)** — bars: widen to minimize gaps with few categories — `barCategoryGap="20%"`, **no small `maxBarSize` cap** (a small cap reintroduces big gaps on wide charts); bar should read at least as wide as the gap. Radius `[6,6,0,0]`, fill `--accent`. Axes ticks `--text-muted`, grid `--border` (horizontal only); tooltip = `--surface` card + `--shadow-float`.
 - **Data table (Linear/Notion-grade, the standard)** — sort (rank-aware for enums), group-by (collapsible groups; pagination off while grouped), resizable columns, show/hide + add columns, pagination (page-size + prev/next + "1–N of M"). Field-aware cells: text; numeric→Geist tabular; enum→chip; status→semantic chip; severity→icon+color+label; ratio/score (NDVI)→mini progress bar (`--surface-muted` track, `--accent` fill) + Geist value.
+- **KPI / metric card illustrations (generated, object-driven)** — every KPI card gets a bespoke SVG filling its **right ~55–58%**, bleeding to bottom + right edges (`preserveAspectRatio="xMidYMax slice"`); text stays left, above the art. **Generate it at dev time with the `svg-design` skill** using the fixed prompt below. **Object-driven only — no human characters or faces.** Recipe: (1) 2–3 layered light **blobs** in the card's KPI colour; (2) an **oversized 2.5D object** for the metric (boxes, clock+check, route map+pin, alert triangle…) with top/side faces; (3) a **floating UI widget** (rounded white card / pill / chip); (4) **ambient shadows** (`feDropShadow` + ground ellipse); (5) subtle **grain** (`feTurbulence` fractalNoise ~5% alpha, full-bleed rect); (6) soft gradient shading. **Colour strictly from the 6 `--kpi-*` tokens** (one per card, by meaning or for variety; white widgets use `--surface`); never a hue outside them. Scope every gradient/filter `id` per card; add `role="img"` + `aria-label`. See Reference components for the prompt + a worked template.
 
 ## Depth & elevation (shadows never grow on hover)
 
@@ -78,9 +83,10 @@ Never set running text below 13px. Sentence case for UI labels.
 
 ## Motion — hover/press feel
 
-- **Hover:** color shift + slight `scale(1.02)`. **Do not increase the drop shadow.**
-- **Press (`:active`):** presses down — `scale(.96) translateY(1px)`.
-- `--ease-standard` is the default (hover/press, color & transform). `--ease-spring` is for overlay/popover **entrances only**, never hover/press. Durations: `--dur-fast` 120ms (transforms), `--dur` 160ms (color/bg), `--dur-slow` 240ms (overlay/expand/collapse). Honor `prefers-reduced-motion`.
+- **Hover = colour/highlight change ONLY — never scale.** Scaling drags the label text (reads as a glitch) and growing padding shifts neighbours. Hover shifts `background`/`color`/`accent` only; **never grow the drop shadow.**
+- **Press (`:active`):** presses down — `scale(.97) translateY(1px)` — so clicks feel physical.
+- **Dropdown/menu/popover entrance:** the `pop-spring` keyframe over `--dur-pop` (480ms) — a gentle, slow overshoot-and-settle, not a snap.
+- Durations: `--dur-fast` 120ms (the press transform), `--dur` 160ms (color/bg + all hover), `--dur-slow` 240ms (expand/collapse), `--dur-pop` 480ms (popover entrance). Honor `prefers-reduced-motion`.
 
 ---
 
@@ -96,6 +102,17 @@ Never set running text below 13px. Sentence case for UI labels.
 - ❌ Thin colored outlines on info cards.
 - ❌ Growing the drop shadow on hover.
 - ❌ Hardcoded hex/px in components.
+- ❌ A bare native `<select>` for filters, menus, or form fields — use the shared dropdown component.
+- ❌ Mixing native and custom form controls in one screen (e.g. a custom popover beside native selects).
+- ❌ Content spanning edge-to-edge on wide screens — use the centered `--content-max` container.
+- ❌ Scaling anything on hover — hover changes colour/highlight only; the scale belongs to the pressed state.
+- ❌ A search input that flexes to full container width — bound it with `--search-min` / `--search-max`.
+- ❌ Default browser scrollbars — use the thin, subtle, track-less accent-tinted scrollbar.
+- ❌ Bar charts with a small `maxBarSize` leaving big gaps between few bars — widen via `barCategoryGap`.
+- ❌ Human characters or faces in KPI illustrations — object-driven only.
+- ❌ KPI illustration colours outside the 6 `--kpi-*` tokens.
+
+> **KPI palette exception:** the 6-colour KPI illustration palette is the *one* sanctioned multi-hue set — used **only** inside KPI-card illustrations (blobs + objects), never for UI chrome, buttons, links, charts, or general accent. The single-accent rule governs everything else.
 
 ---
 
@@ -125,8 +142,166 @@ Never use: "revolutionary", "revolutionize", "game-changer / game-changing", "su
 **Visual-feedback loop — run after any UI work, before calling it done:**
 1. Screenshot the running UI with the **playwright-screenshot-inspector** skill.
 2. Audit the screenshot against this skill / `DESIGN.md`: theme & color, typography, components, depth, motion & hover, anti-slop, accessibility.
-3. Fix every failure, then re-screenshot and re-verify.
-4. Record project-specific decisions (chosen theme, new patterns, project tokens) via the **interface-design** skill in `.interface-design/system.md`. Org-wide rules live here / in `DESIGN.md`; that file holds this project's extensions across sessions.
+3. **Consistency checklist (the things that slip):** every dropdown/select/menu uses the one shared component — **zero native `<select>` elements**, and one dropdown looks identical to the next; content sits in the centered `--content-max` container (not edge-to-edge); search inputs are width-bounded (not full-width); scrollbars are the thin custom ones (no default browser bars); hover changes colour only (nothing scales on hover); dropdowns open with the gentle 480ms spring; bars are wide with small gaps; chips are rounded rects not pills; shadows don't grow on hover; KPI cards carry object-driven illustrations coloured only from the `--kpi-*` palette (no characters/faces, no off-palette hues).
+4. Fix every failure, then re-screenshot and re-verify.
+5. Record project-specific decisions (chosen theme, new patterns, project tokens) via the **interface-design** skill in `.interface-design/system.md`. Org-wide rules live here / in `DESIGN.md`; that file holds this project's extensions across sessions.
+
+---
+
+## Reference components (React + Tailwind)
+
+Copy these canonical implementations instead of improvising each control — improvising is how inconsistencies (a polished custom dropdown next to raw native `<select>`s) creep in. They assume the Tailwind token aliases from `DESIGN.md` (`bg-surface`, `text-accent-text`, `rounded-overlay`, `shadow-float`, etc.) and a `.press` utility for the hover/press feel.
+
+**Dropdowns — the single pattern (`Select`, `MultiSelect`, `Popover`).** All three share one `usePopover` hook (outside-click close) and one trigger/panel style. Use `Select` for single-choice (filters and form fields), `MultiSelect` for multi-choice, `Popover` for custom menu content (e.g. a column show/hide menu).
+
+```tsx
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+
+function usePopover() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+  return { open, setOpen, ref }
+}
+
+const filterTrigger = (active: boolean) =>
+  `press flex items-center gap-2 rounded-button px-3 py-2 text-sm font-medium shadow-sm ${
+    active ? 'bg-accent-soft text-accent-text' : 'bg-surface text-text-primary hover:bg-surface-muted'}`
+const fieldTrigger = 'press flex w-full items-center gap-2 rounded-control bg-surface-muted px-3 py-2 text-sm text-text-primary'
+const PANEL = 'absolute z-50 mt-2 max-h-72 overflow-auto rounded-overlay bg-surface p-1.5 shadow-float'
+const OPTION = 'flex w-full cursor-pointer items-center gap-2.5 rounded-control px-2 py-1.5 text-left text-sm hover:bg-surface-muted'
+
+export interface Option { value: string; label: string }
+
+export function Select({ value, options, onChange, variant = 'filter', active = false }: {
+  value: string; options: Option[]; onChange: (v: string) => void; variant?: 'filter' | 'field'; active?: boolean
+}) {
+  const { open, setOpen, ref } = usePopover()
+  const current = options.find((o) => o.value === value)
+  return (
+    <div ref={ref} className={`relative ${variant === 'field' ? 'w-full' : ''}`}>
+      <button type="button" onClick={() => setOpen((o) => !o)} className={variant === 'field' ? fieldTrigger : filterTrigger(active || open)}>
+        <span className={variant === 'field' ? 'flex-1 truncate text-left' : ''}>{current?.label}</span>
+        <span aria-hidden className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
+      </button>
+      {open && (
+        <div className={`${PANEL} left-0 ${variant === 'field' ? 'w-full' : 'w-48'}`}>
+          {options.map((o) => (
+            <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }}
+              className={`${OPTION} ${o.value === value ? 'font-semibold text-accent-text' : 'text-text-primary'}`}>{o.label}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function MultiSelect({ label, values, options, onToggle }: {
+  label: string; values: Set<string>; options: string[]; onToggle: (v: string) => void
+}) {
+  const { open, setOpen, ref } = usePopover()
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} className={filterTrigger(values.size > 0 || open)}>
+        <span>{label}</span>
+        {values.size ? <span className="rounded-md bg-accent px-1.5 font-numeric text-xs font-bold text-on-accent">{values.size}</span> : null}
+      </button>
+      {open && (
+        <div className={`${PANEL} left-0 w-52`}>
+          {options.map((o) => (
+            <label key={o} className={OPTION}>
+              <input type="checkbox" className="h-4 w-4 accent-accent" checked={values.has(o)} onChange={() => onToggle(o)} />
+              <span>{o}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function Popover({ label, count, children }: { label: ReactNode; count?: number; children: ReactNode }) {
+  const { open, setOpen, ref } = usePopover()
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} className={filterTrigger(open || (count || 0) > 0)}>{label}</button>
+      {open && <div className={`${PANEL} right-0 w-56`}>{children}</div>}
+    </div>
+  )
+}
+```
+
+**Chip** (rounded rect, never a pill; soft fill + same-hue text):
+
+```tsx
+type Tone = 'info' | 'success' | 'warning' | 'error' | 'neutral' | 'accent'
+const tones: Record<Tone, string> = {
+  info: 'bg-info-soft text-info', success: 'bg-success-soft text-success',
+  warning: 'bg-warning-soft text-warning', error: 'bg-error-soft text-error',
+  accent: 'bg-accent-soft text-accent-text', neutral: 'bg-surface-muted text-text-secondary',
+}
+export const Chip = ({ tone, children }: { tone: Tone; children: ReactNode }) =>
+  <span className={`inline-block rounded-chip px-2.5 py-1 text-xs font-semibold ${tones[tone]}`}>{children}</span>
+```
+
+**Modal** (centered floating panel, dimmed backdrop, never `position: fixed` content collapse):
+
+```tsx
+export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/35" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-lg rounded-panel bg-surface p-6 shadow-float">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-text-primary">{title}</h2>
+          <button onClick={onClose} aria-label="Close" className="press grid h-9 w-9 place-items-center rounded-control text-text-secondary hover:bg-surface-muted">✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+```
+
+**Data table** — build one `columns` config (`{ key, label, numeric? }`), derive a visible/ordered subset, and render with: sortable `<th>` buttons (rank-aware for enums), `--surface-muted` row hover, `--text-overline` header style, a `Popover` "Columns" menu for show/hide + reorder, and a pager (`Showing X–Y of Z` + prev/next). Field-aware cells: text; numeric → `font-numeric`; enum → `Chip`; severity → icon+color+label; ratio → mini bar (`--surface-muted` track, `--accent` fill). All filter controls above the table are `Select`/`MultiSelect` from above — never native selects.
+
+**KPI card illustration** — generate one per KPI card at dev time. Invoke the `svg-design` skill with this exact brief **every time**:
+
+> Modern enterprise SaaS dashboard KPI card illustration, premium 2.5D vector artwork, large cropped composition, illustration fills entire right half of card, touches bottom edge and right edge, only partial scene visible, object-driven (no human characters or faces), soft gradients, subtle grain texture, ambient occlusion shadows, layered depth, oversized foreground elements, floating UI widgets, abstract organic shapes, premium fintech aesthetic, Stripe + Linear + Ramp + Brex + Figma illustration style, highly polished product-design showcase, minimal color palette, clean white background, modern B2B software design language, editorial vector art, sophisticated lighting, dashboard-ready, dribbble quality, design-system friendly.
+
+Card shell: `position:relative; overflow:hidden`, text in a `z-index:2` block on the left; the SVG in an absolutely-positioned right panel (`top/right/bottom:0; width:58%`) with `preserveAspectRatio="xMidYMax slice"`. Worked template (blue "shipments" card — swap the `kpi-blue` tokens for another KPI hue and the motif for the metric):
+
+```xml
+<svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stacked parcels with a tracking widget">
+  <defs>
+    <radialGradient id="k1bgA" cx="64%" cy="40%" r="76%"><stop offset="0%" stop-color="var(--kpi-blue-bg)"/><stop offset="100%" stop-color="#fff"/></radialGradient>
+    <linearGradient id="k1bgB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="var(--kpi-blue-soft)"/><stop offset="100%" stop-color="var(--kpi-blue-soft)"/></linearGradient>
+    <linearGradient id="k1obj" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--kpi-blue)"/><stop offset="100%" stop-color="var(--kpi-blue-deep)"/></linearGradient>
+    <filter id="k1soft" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="var(--kpi-blue-deep)" flood-opacity="0.18"/></filter>
+    <filter id="k1grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter>
+  </defs>
+  <path d="M70,150 C40,95 95,40 165,52 C230,63 250,18 305,40 C375,67 405,150 372,210 C342,262 250,266 165,256 C92,247 100,205 70,150 Z" fill="url(#k1bgA)"/>
+  <path d="M150,118 C140,74 205,54 252,72 C300,90 346,82 360,132 C374,180 328,212 268,212 C202,212 160,168 150,118 Z" fill="url(#k1bgB)" opacity="0.8"/>
+  <!-- floating UI widget -->
+  <g filter="url(#k1soft)"><rect x="226" y="34" width="150" height="58" rx="13" fill="#fff"/>
+    <circle cx="246" cy="63" r="5" fill="var(--kpi-blue)"/><path d="M251,63 h70" stroke="var(--kpi-blue-soft)" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+    <rect x="240" y="76" width="64" height="6" rx="3" fill="var(--kpi-blue-soft)" opacity="0.6"/></g>
+  <ellipse cx="214" cy="250" rx="156" ry="16" fill="var(--kpi-blue-deep)" opacity="0.10"/>
+  <!-- oversized 2.5D object (parcel) -->
+  <g filter="url(#k1soft)">
+    <path d="M214,158 l64,-19 l64,19 l0,88 l-128,0 Z" fill="url(#k1obj)"/>
+    <path d="M214,158 l64,-19 l64,19 l-64,19 Z" fill="var(--kpi-blue)" opacity="0.7"/>
+    <path d="M278,177 l64,-19 l0,88 l-64,0 Z" fill="var(--kpi-blue-deep)"/>
+    <rect x="262" y="196" width="30" height="10" rx="2" fill="var(--kpi-blue-soft)" opacity="0.9"/>
+  </g>
+  <rect x="0" y="0" width="400" height="260" filter="url(#k1grain)" opacity="0.6"/>
+</svg>
+```
 
 ---
 
@@ -149,10 +324,12 @@ Never use: "revolutionary", "revolutionize", "game-changer / game-changing", "su
   --text-sm: 0.8125rem;      --lh-sm: 1.5;
   --text-overline: 0.6875rem;--lh-overline: 1.4;
 
-  /* spacing */
+  /* spacing & layout */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
   --space-12: 48px; --space-16: 64px; --space-edge: 12px;
+  --content-max: 1320px; /* centered max-width for main content — never span edge-to-edge */
+  --search-min: 240px; --search-max: 420px; /* search inputs are width-bounded, never full-width */
 
   /* radii */
   --radius-chip: 8px;    --radius-control: 10px; --radius-button: 12px;
@@ -174,7 +351,17 @@ Never use: "revolutionary", "revolutionize", "game-changer / game-changing", "su
   /* motion */
   --ease-standard: cubic-bezier(.2,.7,.3,1);
   --ease-spring: cubic-bezier(.34,1.56,.64,1);
-  --dur-fast: 120ms; --dur: 160ms; --dur-slow: 240ms;
+  --dur-fast: 120ms; --dur: 160ms; --dur-slow: 240ms; --dur-pop: 480ms;
+
+  /* KPI illustration palette — 6 fixed hues, theme-independent, ILLUSTRATION-ONLY
+     (the one sanctioned multi-hue exception; decorative, not bound by text-contrast AA).
+     Each: -bg (blob/background tint) · -soft (mid blob) · base (object) · -deep (object side / shadow). */
+  --kpi-blue-bg:#EEF3FF;   --kpi-blue-soft:#C2D2FF;   --kpi-blue:#5470F0;   --kpi-blue-deep:#3B53C9;
+  --kpi-green-bg:#ECFAF1;  --kpi-green-soft:#BFE9CE;  --kpi-green:#2FA45F;  --kpi-green-deep:#1F7D47;
+  --kpi-purple-bg:#F3EFFF; --kpi-purple-soft:#D6CBFB; --kpi-purple:#7A5AF0; --kpi-purple-deep:#5B3FD6;
+  --kpi-amber-bg:#FFF6E6;  --kpi-amber-soft:#FAD79A;  --kpi-amber:#F2A516;  --kpi-amber-deep:#C9790A;
+  --kpi-teal-bg:#E6F7F6;   --kpi-teal-soft:#B6E6E2;   --kpi-teal:#14A89B;   --kpi-teal-deep:#0C7D73;
+  --kpi-rose-bg:#FDEEF1;   --kpi-rose-soft:#F8C8D3;   --kpi-rose:#E85C7F;   --kpi-rose-deep:#C23A5E;
 }
 
 /* ---- Theme: Meridian (default) ---- */
@@ -230,6 +417,38 @@ Never use: "revolutionary", "revolutionize", "game-changer / game-changing", "su
   --accent:#1F2329; --accent-hover:#0E1115; --accent-text:#1F2329; --accent-soft:#E9EAEC; --on-accent:#FFFFFF;
   --success:#157F54; --success-soft:#E0F1E9; --warning:#8A5D0C; --warning-soft:#F4ECD5;
   --error:#C0392B; --error-soft:#F8E4E1; --info:#2C6FB0; --info-soft:#E2EDF8;
+}
+
+/* ---- Global base: scrollbar + interaction + popover entrance ---- */
+
+/* Thin, subtle scrollbars — no track, no buttons, rounded ends, light accent tint */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 35%, transparent) transparent; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Interaction: hover = colour only (no scale); press = pressed feel. Apply .press to interactive elements. */
+.press {
+  transition: background-color var(--dur) var(--ease-standard), color var(--dur) var(--ease-standard),
+    border-color var(--dur) var(--ease-standard), filter var(--dur) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
+}
+.press:active { transform: scale(.97) translateY(1px); }
+
+/* Dropdown / menu / popover entrance — gentle spring (overshoot then settle). Apply .pop-enter to the panel. */
+@keyframes pop-spring {
+  0%   { opacity: 0; transform: translateY(-6px) scale(.96); }
+  60%  { opacity: 1; transform: translateY(0) scale(1.012); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.pop-enter { transform-origin: top center; animation: pop-spring var(--dur-pop) var(--ease-standard) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .press:active { transform: none; }
+  .pop-enter { animation: none; }
 }
 ```
 

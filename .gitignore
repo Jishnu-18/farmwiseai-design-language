@@ -5,6 +5,12 @@
 # look like a skill-consuming "project" and blocks `npx skills add` discovery.
 skills-lock.json
 
+# Local test/sandbox prototypes — NOT part of the design-language deliverable
+_sandbox/
+
+# Local preview/dev-server config (points at the sandbox)
+.claude/launch.json
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
