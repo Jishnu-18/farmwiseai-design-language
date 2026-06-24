@@ -1,6 +1,6 @@
 ---
 name: farmwiseai-brand-guidelines
-description: FarmwiseAI's official UI design language — five selectable color themes, typography, spacing, depth, motion, components, accessibility, and anti-slop rules. Use on ANY task that builds, designs, restyles, reviews, prototypes, or audits a user interface, web page, app, dashboard, screen, component, table, form, or visual layout for FarmwiseAI (React + Tailwind or vanilla HTML). At the start of UI work, ask the user which of the five themes to apply. Triggers on: UI, frontend, design, build a page/app/screen/component, dashboard, restyle, theme, brand, layout, prototype.
+description: FarmwiseAI's official UI design language — five selectable color themes, typography, spacing, depth, motion, components, accessibility, and anti-slop rules. Use on ANY task that builds, designs, restyles, reviews, prototypes, or audits a user interface, web page, app, dashboard, screen, component, table, form, or visual layout for FarmwiseAI (React + Tailwind or vanilla HTML). At the start of UI work, ask the user which of the five themes to apply. Triggers on these phrases — UI, frontend, design, build a page/app/screen/component, dashboard, restyle, theme, brand, layout, prototype.
 license: Internal — FarmwiseAI. Skill structure adapted from Anthropic's brand-guidelines skill.
 ---
 
