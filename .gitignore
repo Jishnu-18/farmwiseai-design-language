@@ -1,6 +1,10 @@
 # Installed third-party skills — reinstall with: npx skills add <repo> --skill <name>
 .agents/
 
+# Local skills lockfile — a consumer artifact; its presence makes this repo
+# look like a skill-consuming "project" and blocks `npx skills add` discovery.
+skills-lock.json
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
