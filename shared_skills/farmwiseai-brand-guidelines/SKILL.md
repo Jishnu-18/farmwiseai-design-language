@@ -73,10 +73,11 @@ Never set running text below 13px. Sentence case for UI labels.
 - **Severity / enum-with-meaning** — icon + color + label: tinted rounded square + themed icon + label. critical→`--error` (alert), high→`--warning` (chevrons-up), medium→`--info` (equals), low→`--success` (chevron-down).
 - **Cards/panels** — `--surface`, `--radius-card` (16px), `--shadow-card`. No left/top accent stroke, no thin colored outline. Floating panels: `--radius-panel` (20px) + `--shadow-float`.
 - **Sidebar** — floating card, edge gap. Hover = `--surface-muted` (color only). Active item: `--accent-soft` bg + `--accent-text` + accent dot.
-- **Filter strip + dropdowns** — horizontal filter buttons; open tints to `--accent-soft`/`--accent-text`; active count badge. Popover = floating card (`--radius-overlay`, `--shadow-float`), **gentle-spring entrance** (`pop-spring`, `--dur-pop` 480ms); holds checkboxes / multi-select (optionally searchable) / radios / sliders.
+- **Filter strip + dropdowns** — every filter-bar control (buttons, dropdown triggers, search field, date-range box) sits on `--surface` with **`--shadow-card`** (a proper visible drop shadow — floating chips, not the faint `--shadow-sm`), radius 12; open tints to `--accent-soft`/`--accent-text`; active count badge. Popover = floating card (`--radius-overlay`, `--shadow-float`), **gentle-spring entrance** (`pop-spring`, `--dur-pop` 480ms); holds checkboxes / multi-select (optionally searchable) / radios / sliders.
 - **Charts (recharts)** — bars: widen to minimize gaps with few categories — `barCategoryGap="20%"`, **no small `maxBarSize` cap** (a small cap reintroduces big gaps on wide charts); bar should read at least as wide as the gap. Radius `[6,6,0,0]`, fill `--accent`. Axes ticks `--text-muted`, grid `--border` (horizontal only); tooltip = `--surface` card + `--shadow-float`.
-- **Data table (Linear/Notion-grade, the standard)** — sort (rank-aware for enums), group-by (collapsible groups; pagination off while grouped), resizable columns, show/hide + add columns, pagination (page-size + prev/next + "1–N of M"). Field-aware cells: text; numeric→Geist tabular; enum→chip; status→semantic chip; severity→icon+color+label; ratio/score (NDVI)→mini progress bar (`--surface-muted` track, `--accent` fill) + Geist value.
+- **Data table (Linear/Notion-grade, the standard)** — header row on a `--accent-soft` background (a very light shade of the accent) with `--text-muted` overline labels + `--border` divider; sort (rank-aware for enums), group-by (collapsible groups; pagination off while grouped), resizable columns, show/hide + add columns, pagination (page-size + prev/next + "1–N of M"). Field-aware cells: text; numeric→Geist tabular; enum→chip; status→semantic chip; severity→icon+color+label; ratio/score (NDVI)→mini progress bar (`--surface-muted` track, `--accent` fill) + Geist value.
 - **KPI / metric card illustrations (generated, object-driven)** — **layout:** prefer a single row of 4, collapsing to 2×2 then single column (`grid-cols-1 md:grid-cols-2 xl:grid-cols-4`, 1rem gutter); 2×2 is an acceptable fallback if 4-up is too tight for the art. Every KPI card gets a bespoke SVG filling its **right ~55–58%**, bleeding to bottom + right edges (`preserveAspectRatio="xMidYMax slice"`); text stays left, above the art. **Generate it at dev time with the `svg-design` skill** using the fixed prompt below. **Object-driven only — no human characters or faces.** Recipe: (1) 2–3 layered light **blobs** in the card's KPI colour; (2) an **oversized 2.5D object** for the metric (boxes, clock+check, route map+pin, alert triangle…) with top/side faces; (3) a **floating UI widget** (rounded white card / pill / chip); (4) **ambient shadows** (`feDropShadow` + ground ellipse); (5) subtle **grain** (`feTurbulence` fractalNoise ~5% alpha, full-bleed rect); (6) soft gradient shading. **Colour strictly from the 6 `--kpi-*` tokens** (one per card, by meaning or for variety; white widgets use `--surface`); never a hue outside them. Scope every gradient/filter `id` per card; add `role="img"` + `aria-label`. See Reference components for the prompt + a worked template.
+- **Ambient page background (optional, user-selectable)** — a subtle full-viewport layer behind all content (`fixed; inset:0; z-index:-1; pointer-events:none`), token-colored, most visible in the margins/gaps. Two sanctioned options + off: **Aurora dots** *(default)* — faint dot grid + diffuse `--kpi-blue/-purple/-teal` blobs slowly drifting, revealed via a CSS dot-mask (pure CSS); **Interactive hex** — a flat hex grid on canvas (no skew/perspective), faint `--text-muted` outlines, hexes lit by a **very light** `--accent` wash on pointer proximity (wide radius) with a **persistent decaying glow → soft trail** (pointer via `window` listener); **Off**. Expose both a **Background** selector (default Aurora dots) and a **Theme** selector (the 5 themes via `data-theme`) in **Settings → Appearance**; persist both. Always subtle, slow, `prefers-reduced-motion`-aware. Code in Reference components.
 
 ## Depth & elevation (shadows never grow on hover)
 
@@ -113,7 +114,7 @@ Never set running text below 13px. Sentence case for UI labels.
 - ❌ Human characters or faces in KPI illustrations — object-driven only.
 - ❌ KPI illustration colours outside the 6 `--kpi-*` tokens.
 
-> **KPI palette exception:** the 6-colour KPI illustration palette is the *one* sanctioned multi-hue set — used **only** inside KPI-card illustrations (blobs + objects), never for UI chrome, buttons, links, charts, or general accent. The single-accent rule governs everything else.
+> **KPI palette exception:** the 6-colour KPI illustration palette is the *one* sanctioned multi-hue set — used **only** inside KPI-card illustrations and the ambient page background (blobs / hexes), never for UI chrome, buttons, links, charts, or general accent. The single-accent rule governs everything else.
 
 ---
 
@@ -303,6 +304,60 @@ Card shell: `position:relative; overflow:hidden`, text in a `z-index:2` block on
   <rect x="0" y="0" width="400" height="260" filter="url(#k1grain)" opacity="0.6"/>
 </svg>
 ```
+
+**Ambient page background** — a `<PageBackground>` reads the chosen mode from prefs and renders one fixed layer. Aurora is pure CSS; Interactive hex is a canvas. Selector + theme switch live in Settings.
+
+```css
+/* aurora + hex layer base */
+.fwbg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.fwbg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fwbg-dots { position: absolute; inset: 0;
+  background-image: radial-gradient(circle 1.4px, color-mix(in srgb, var(--text-muted) 20%, transparent) 99%, transparent);
+  background-size: 24px 24px; }
+.fwbg-mask { position: absolute; inset: 0;
+  -webkit-mask: radial-gradient(circle 1.7px, #000 99%, transparent) 0 0 / 24px 24px;
+          mask: radial-gradient(circle 1.7px, #000 99%, transparent) 0 0 / 24px 24px; }
+.fwbg-aurora > i { position: absolute; inset: -30%; display: block; opacity: .5;
+  background:
+    radial-gradient(38vw 38vw at 22% 30%, color-mix(in srgb, var(--kpi-blue) 70%, transparent), transparent 60%),
+    radial-gradient(42vw 42vw at 78% 26%, color-mix(in srgb, var(--kpi-purple) 65%, transparent), transparent 60%),
+    radial-gradient(40vw 40vw at 60% 82%, color-mix(in srgb, var(--kpi-teal) 65%, transparent), transparent 60%);
+  animation: fwDrift 34s ease-in-out infinite alternate; }
+@keyframes fwDrift { 0% { transform: translate3d(-3%,-2%,0) scale(1); } 100% { transform: translate3d(3%,3%,0) scale(1.1); } }
+@media (prefers-reduced-motion: reduce) { .fwbg-aurora > i { animation: none; } }
+```
+
+```tsx
+// Aurora = <div className="fwbg"><div className="fwbg-dots"/><div className="fwbg-mask fwbg-aurora"><i/></div></div>
+// Interactive hex (flat grid, pointer-proximity glow with a persistent decaying trail):
+function HexCanvas() {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const cv = ref.current!, ctx = cv.getContext('2d')!
+    const cs = getComputedStyle(document.documentElement)
+    const accent = cs.getPropertyValue('--accent').trim(), neutral = cs.getPropertyValue('--text-muted').trim()
+    const rgba = (hex: string, a: number) => { const n = parseInt(hex.replace('#',''),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})` }
+    const dpr = Math.min(devicePixelRatio||1,2), size=24, sq3=Math.sqrt(3), colStep=1.5*size, rowStep=sq3*size
+    let w=0,h=0,raf=0,mx=-9999,my=-9999,dmx=-9999,dmy=-9999, hex:{x:number;y:number}[]=[], hi=new Float32Array(0)
+    const setup = () => { w=cv.clientWidth; h=cv.clientHeight; cv.width=w*dpr|0; cv.height=h*dpr|0; ctx.setTransform(dpr,0,0,dpr,0,0)
+      hex=[]; for(let c=-1;c*colStep<w+size;c++){const cx=c*colStep,off=c%2?rowStep/2:0; for(let r=-1;r*rowStep+off<h+size;r++)hex.push({x:cx,y:r*rowStep+off})} hi=new Float32Array(hex.length) }
+    const draw = () => { dmx<-9000?(dmx=mx,dmy=my):(dmx+=(mx-dmx)*0.2,dmy+=(my-dmy)*0.2); ctx.clearRect(0,0,w,h)
+      const R=220, live=dmx>-9000, stroke=rgba(neutral,0.075); ctx.lineWidth=1
+      for(let i=0;i<hex.length;i++){ const p=hex[i]; let v=hi[i]*0.95
+        if(live){const b=Math.max(0,1-Math.hypot(p.x-dmx,p.y-dmy)/R); if(b>v)v=b} hi[i]=v
+        ctx.beginPath(); for(let k=0;k<6;k++){const a=Math.PI/3*k,px=p.x+size*Math.cos(a),py=p.y+size*Math.sin(a); k?ctx.lineTo(px,py):ctx.moveTo(px,py)} ctx.closePath()
+        if(v>0.003){ctx.fillStyle=rgba(accent,v*0.11); ctx.fill()} ctx.strokeStyle=stroke; ctx.stroke() } }
+    const loop = () => { draw(); raf=requestAnimationFrame(loop) }
+    setup(); matchMedia('(prefers-reduced-motion: reduce)').matches ? draw() : raf=requestAnimationFrame(loop)
+    const onMove=(e:MouseEvent)=>{mx=e.clientX;my=e.clientY}, onLeave=()=>{mx=-9999;my=-9999}, onResize=()=>setup()
+    addEventListener('mousemove',onMove); addEventListener('resize',onResize); document.addEventListener('mouseleave',onLeave)
+    return ()=>{cancelAnimationFrame(raf);removeEventListener('mousemove',onMove);removeEventListener('resize',onResize);document.removeEventListener('mouseleave',onLeave)}
+  }, [])  // remount on theme change (key={theme}) so it re-reads --accent
+  return <canvas ref={ref} className="fwbg-canvas" />
+}
+```
+
+Theme + background are app-level prefs (persisted; theme applied via `document.documentElement.setAttribute('data-theme', theme)` on change), surfaced as two `Select`s in Settings → Appearance.
 
 ---
 

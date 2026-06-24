@@ -226,7 +226,7 @@ All components consume the semantic tokens and shared structural tokens. Pattern
 - Floating card, edge gap `--space-edge`. Items: radius ~11px, `--text-secondary`. Hover: `--surface-muted` (color only, no scale). Active: `--accent-soft` bg + `--accent-text`, with an accent dot.
 
 **Filter strip + dropdowns**
-- Horizontal row of filter buttons (`--surface`, `--shadow-sm`, radius 12). Open state tints to `--accent-soft`/`--accent-text` and rotates the chevron. Active selections show a count badge (`--accent` fill, Geist).
+- Horizontal row of filter controls. Every filter-bar control — buttons, dropdown triggers, the search field, the date-range box — sits on `--surface` with `--shadow-card` (a proper, visible drop shadow so they read as floating chips above the table; not the faint `--shadow-sm`), radius 12. Open state tints to `--accent-soft`/`--accent-text` and rotates the chevron. Active selections show a count badge (`--accent` fill, Geist).
 - Popover = floating card (`--radius-overlay` 16px, `--shadow-float`), entrance via the **gentle spring** (`pop-spring` keyframe, `--dur-pop` 480ms — a slow, soft overshoot, not a snap). Holds the appropriate input type per filter: **checkboxes**, **multi-select checkboxes** (optionally with search), **radio buttons**, **sliders**. Each popover offers Reset / Done.
 
 **Charts (recharts)**
@@ -234,7 +234,7 @@ All components consume the semantic tokens and shared structural tokens. Pattern
 - Axes/grid: ticks `--text-muted`, grid lines `--border` (horizontal only), no axis lines where avoidable. Series color `--accent`; multi-series/status use semantic tokens. Tooltip = `--surface` card, `--shadow-float`, `--radius-lg`.
 
 **Data table** (Linear/Notion-grade — the standard pattern)
-- `--surface` card, header row in `--text-muted` overline style on a `--border` divider; body rows `--text-sm`, `--surface-muted` row hover.
+- `--surface` card. **Header row:** `--accent-soft` background (a very light shade of the accent), `--text-muted` overline-style labels, `--border` bottom divider. Body rows `--text-sm`, `--surface-muted` row hover.
 - Required features: **sort** (click header, direction arrow; sort enums by rank not alphabetically), **group by** (collapsible group header rows; pagination off while grouped), **resizable columns** (drag header edge), **show/hide columns** and **add column** (Columns menu), **pagination** (page-size select + prev/next + "1–N of M").
 - **Field-aware cells:** text; numeric → Geist tabular; predefined set → chip; status → semantic chip; severity → icon+color+label; ratio/score (e.g. NDVI) → mini progress bar (`--surface-muted` track, `--accent` fill) + Geist value.
 
@@ -247,6 +247,14 @@ All components consume the semantic tokens and shared structural tokens. Pattern
 - **Recipe — every illustration has all of:** (1) 2–3 layered light **organic blobs** in the card's KPI colour (radial + linear gradients); (2) an **oversized foreground object**, rendered 2.5D with top/side faces for depth; (3) a **floating UI widget** (small rounded white card / pill / chip); (4) **ambient shadows** — `feDropShadow` on objects + a faint ground ellipse; (5) a subtle **grain** overlay (`feTurbulence` fractalNoise, ~5% alpha, full-bleed `<rect>`); (6) soft gradient shading throughout.
 - **Colour: strictly from the 6 KPI tokens** — `--kpi-{blue|green|purple|amber|teal|rose}` (each with `-bg` / `-soft` / base / `-deep`; see §11). Pick **one** KPI colour per card — by the metric's meaning where it maps (positive→green, caution→amber, alert→rose, neutral→blue/purple/teal) or for variety otherwise. **Never use a hue outside these 6.** White widgets use `--surface`; SVG fills/stops reference the tokens via `var(--kpi-…)`.
 - Authoring in inline SVG: scope all gradient/filter `id`s per card (collisions across inline SVGs render wrong); `role="img"` + `aria-label` describing the scene.
+
+**Ambient page background (optional, user-selectable)**
+- A subtle full-viewport background may sit behind all content (`position:fixed; inset:0; z-index:-1; pointer-events:none`), token-colored — most visible in the margins around the centered content and the gaps between floating cards. Two sanctioned options + off:
+  - **Aurora dots** *(default)* — a faint dot grid (`--text-muted` ~20%) with diffuse `--kpi-blue / -purple / -teal` blobs slowly drifting, revealed only at the dot positions via a CSS dot-mask. Pure CSS.
+  - **Interactive hex** — a **flat** hexagon grid (no skew or perspective) on canvas; faint `--text-muted` outlines (~0.075α); hexes light with a **very light** `--accent` wash by pointer proximity over a **wide** radius, and each hex holds a **persistent, decaying glow so the cursor leaves a soft fading trail** (pointer tracked via a `window` listener since the layer is non-interactive).
+  - **Off.**
+- **Expose as a user setting** in **Settings → Appearance**: a **Background** selector (Aurora dots / Interactive hex / Off, default **Aurora dots**) alongside a **Theme** selector (the five themes, applied by setting `data-theme` on the root). Persist both (e.g. localStorage).
+- Always subtle: low opacity, slow motion, never competes with content; respect `prefers-reduced-motion`. Reference implementation (aurora CSS + hex canvas + the prefs / runtime theme-switch) is in the skill.
 
 ---
 
@@ -315,7 +323,7 @@ Layered, soft, multi-stop shadows. **Shadows never grow on hover.**
 - ❌ Human characters or faces in KPI illustrations — object-driven only.
 - ❌ KPI illustration colours outside the 6 `--kpi-*` tokens.
 
-> **KPI palette exception:** the 6-colour KPI illustration palette is the *one* sanctioned multi-hue set. It applies **only** inside KPI-card illustrations (their blobs + objects) — never to UI chrome, buttons, links, charts, or general accent. The single-accent rule governs everything else.
+> **KPI palette exception:** the 6-colour KPI illustration palette is the *one* sanctioned multi-hue set. It applies **only** inside KPI-card illustrations and the ambient page background (their blobs / hexes) — never to UI chrome, buttons, links, charts, or general accent. The single-accent rule governs everything else.
 
 ---
 
