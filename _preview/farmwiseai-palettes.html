@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FarmwiseAI — palette options (preview, not a deliverable)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400..700&family=Fraunces:opsz,wght@9..144,400..600&family=Geist:wght@400..700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Figtree',system-ui,sans-serif;
+    background:#E9E7E2;
+    color:#1c1a17;
+    -webkit-font-smoothing:antialiased;
+    padding:40px 24px 80px;
+    line-height:1.5;
+  }
+  .wrap{max-width:1140px;margin:0 auto}
+  .intro{margin-bottom:40px}
+  .intro h1{font-family:'Bricolage Grotesque';font-weight:700;font-size:30px;letter-spacing:-.02em}
+  .intro p{color:#5a5448;max-width:760px;margin-top:8px;font-size:15px}
+  .note{margin-top:12px;font-size:13px;color:#807a6e;background:#fff;display:inline-block;padding:8px 14px;border-radius:10px;border:1px solid #ddd}
+
+  /* ---- shared brand language (values pulled from var()s set per palette) ---- */
+  .palette{margin:48px 0;padding:28px;border-radius:28px;background:var(--canvas);
+    box-shadow:0 1px 2px rgba(0,0,0,.05),0 18px 40px rgba(0,0,0,.08),0 40px 80px rgba(0,0,0,.05);}
+  .palette h2{font-family:var(--font-head);font-weight:var(--head-weight);font-size:26px;color:var(--text-primary);letter-spacing:-.01em}
+  .palette .sub{color:var(--text-secondary);font-size:14px;margin-top:2px}
+  .head-font-tag{font-family:'Figtree';font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text);font-weight:600}
+
+  /* app frame mock */
+  .frame{margin-top:22px;display:grid;grid-template-columns:208px 1fr;gap:14px;
+    background:var(--canvas);border-radius:24px;padding:14px;min-height:380px}
+  .float-card{background:var(--surface);border-radius:18px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 16px rgba(0,0,0,.08),0 18px 40px rgba(0,0,0,.05);}
+  /* sidebar floats with a gap from edges */
+  .sidebar{padding:16px 14px;align-self:start}
+  .brandrow{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .logo{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--on-accent);font-family:'Bricolage Grotesque';font-weight:800;font-size:16px}
+  .brandname{font-family:var(--font-head);font-weight:var(--head-weight);font-size:16px;color:var(--text-primary)}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;font-size:14px;color:var(--text-secondary);text-decoration:none;margin-bottom:3px;transition:transform .12s cubic-bezier(.2,.7,.3,1),background-color .15s,color .15s}
+  .nav a .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.5}
+  .nav a:hover{background:var(--surface-muted);color:var(--text-primary);transform:scale(1.02)}
+  .nav a:active{transform:scale(.98) translateY(1px)}
+  .nav a.active{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+  .nav a.active .dot{background:var(--accent);opacity:1}
+
+  .main{display:flex;flex-direction:column;gap:14px}
+  .topbar{display:flex;align-items:center;justify-content:space-between}
+  .topbar h3{font-family:var(--font-head);font-weight:var(--head-weight);font-size:20px;color:var(--text-primary)}
+  .btn{font-family:'Figtree';font-weight:600;font-size:13.5px;border:none;border-radius:12px;padding:9px 16px;cursor:pointer;transition:transform .12s cubic-bezier(.2,.7,.3,1),background-color .15s,filter .15s,color .15s}
+  .btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:0 2px 6px color-mix(in srgb,var(--accent) 35%,transparent)}
+  .btn-primary:hover{transform:scale(1.02);filter:brightness(.94)}
+  .btn-primary:active{transform:scale(.97) translateY(1px)}
+  .btn-ghost{background:var(--surface);color:var(--text-primary);box-shadow:0 1px 2px rgba(0,0,0,.05),0 3px 8px rgba(0,0,0,.06)}
+  .btn-ghost:hover{transform:scale(1.02);background:var(--surface-muted)}
+  .btn-ghost:active{transform:scale(.97) translateY(1px)}
+
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .metric{padding:16px 18px}
+  .metric .label{font-size:12.5px;color:var(--text-muted);letter-spacing:.01em}
+  .metric .num{font-family:'Geist';font-weight:700;font-size:30px;color:var(--text-primary);letter-spacing:-.02em;margin-top:6px;line-height:1}
+  .metric .delta{font-family:'Geist';font-size:12.5px;font-weight:600;margin-top:8px;display:inline-block}
+  .up{color:var(--success)} .down{color:var(--error)}
+
+  .row2{display:grid;grid-template-columns:1.1fr 1fr;gap:14px}
+  .chartcard{padding:18px}
+  .chartcard .ttl{font-family:var(--font-head);font-weight:var(--head-weight);font-size:15px;color:var(--text-primary)}
+  .bars{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:16px}
+  .bars span{flex:1;background:var(--accent-soft);border-radius:7px 7px 4px 4px;position:relative;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+  .bars span::after{content:'';position:absolute;left:0;right:0;bottom:0;height:38%;background:var(--accent);border-radius:7px 7px 4px 4px}
+  .bars span:hover{transform:scaleY(1.06);transform-origin:bottom}
+
+  /* map card with glass overlay */
+  .mapcard{position:relative;overflow:hidden;padding:0;min-height:200px;
+    background:
+      radial-gradient(120px 90px at 30% 35%, var(--accent-soft), transparent 70%),
+      repeating-linear-gradient(38deg,var(--surface-muted) 0 22px,var(--canvas) 22px 44px);
+  }
+  .mapveins{position:absolute;inset:0;opacity:.5;
+    background:
+      linear-gradient(90deg,transparent 49%,var(--border) 49% 51%,transparent 51%) 0 0/80px 100%,
+      linear-gradient(0deg,transparent 49%,var(--border) 49% 51%,transparent 51%) 0 0/100% 64px;}
+  .glass{position:absolute;left:14px;bottom:14px;right:14px;
+    background:color-mix(in srgb,var(--surface) 62%,transparent);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);
+    border:1px solid color-mix(in srgb,#fff 55%,transparent);
+    border-radius:16px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 8px 26px rgba(0,0,0,.16)}
+  .glass .gt{font-size:13px;color:var(--text-primary);font-weight:600}
+  .glass .gs{font-size:12px;color:var(--text-secondary)}
+  .pin{position:absolute;width:14px;height:14px;border-radius:50% 50% 50% 0;background:var(--accent);transform:rotate(-45deg);box-shadow:0 3px 8px rgba(0,0,0,.3);top:64px;left:34%}
+
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .badge{font-size:12px;font-weight:600;padding:5px 11px;border-radius:9px}
+  .b-suc{background:var(--success-soft);color:var(--success)}
+  .b-warn{background:var(--warning-soft);color:var(--warning)}
+  .b-err{background:var(--error-soft);color:var(--error)}
+  .b-info{background:var(--info-soft);color:var(--info)}
+
+  /* swatch + specimen footer */
+  .footer{margin-top:22px;display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+  .swatches{display:flex;flex-wrap:wrap;gap:10px}
+  .sw{width:84px}
+  .sw .chip{height:48px;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+  .sw .nm{font-size:11px;color:var(--text-secondary);margin-top:5px}
+  .sw .hex{font-family:'Geist';font-size:11px;color:var(--text-muted)}
+  .specimen .big{font-family:var(--font-head);font-weight:var(--head-weight);font-size:34px;color:var(--text-primary);letter-spacing:-.02em;line-height:1.05}
+  .specimen .body{font-size:14px;color:var(--text-secondary);margin-top:10px}
+  .specimen .data{font-family:'Geist';font-weight:700;font-size:20px;color:var(--text-primary);margin-top:12px}
+  .specimen .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-text);font-weight:600;margin-top:14px}
+
+  /* ============ PALETTE TOKENS ============ */
+  .p-mulberry{
+    --canvas:#F7F4F5;--surface:#FFFFFF;--surface-muted:#EFEAEC;
+    --text-primary:#1E1A1C;--text-secondary:#574E51;--text-muted:#847B7E;--border:#E7E0E2;
+    --accent:#9B2D55;--accent-text:#9B2D55;--accent-soft:#F4E2E9;--on-accent:#FFFFFF;
+    --success:#2E7D4F;--success-soft:#E4F1E9;--warning:#8A5D0C;--warning-soft:#F6ECD8;
+    --error:#C0392B;--error-soft:#F8E4E1;--info:#2C6E8F;--info-soft:#E0EDF3;
+    --font-head:'Fraunces';--head-weight:600;
+  }
+  .p-meridian{
+    --canvas:#F6F7F9;--surface:#FFFFFF;--surface-muted:#EEF0F3;
+    --text-primary:#14181F;--text-secondary:#4A5160;--text-muted:#757D8C;--border:#E4E7EC;
+    --accent:#0B7256;--accent-text:#0B7256;--accent-soft:#DEF0EA;--on-accent:#FFFFFF;
+    --success:#157F54;--success-soft:#E0F1E9;--warning:#8A6100;--warning-soft:#F4ECD5;
+    --error:#C0392B;--error-soft:#F8E4E1;--info:#2C6FB0;--info-soft:#E2EDF8;
+    --font-head:'Bricolage Grotesque';--head-weight:700;
+  }
+  .p-harbor{
+    --canvas:#F4F6F8;--surface:#FFFFFF;--surface-muted:#EAEEF2;
+    --text-primary:#131A21;--text-secondary:#485663;--text-muted:#76828D;--border:#E1E7EC;
+    --accent:#15577D;--accent-text:#15577D;--accent-soft:#DDEAF2;--on-accent:#FFFFFF;
+    --success:#157F54;--success-soft:#E0F1E9;--warning:#8A5D0C;--warning-soft:#F4ECD5;
+    --error:#C0392B;--error-soft:#F8E4E1;--info:#2C6FB0;--info-soft:#E2EDF8;
+    --font-head:'Bricolage Grotesque';--head-weight:700;
+  }
+  .p-terra{
+    --canvas:#F7F4EE;--surface:#FFFFFF;--surface-muted:#EFEAE0;
+    --text-primary:#1C1A17;--text-secondary:#5A5448;--text-muted:#837C6E;--border:#E5DFD3;
+    --accent:#B4502E;--accent-text:#97401F;--accent-soft:#F3E2DA;--on-accent:#FFFFFF;
+    --success:#2E7D4F;--success-soft:#E4F1E9;--warning:#8A5D0C;--warning-soft:#F6ECD8;
+    --error:#C0392B;--error-soft:#F8E4E1;--info:#2C6E8F;--info-soft:#E0EDF3;
+    --font-head:'Fraunces';--head-weight:600;
+  }
+  .p-graphite{
+    --canvas:#F6F6F7;--surface:#FFFFFF;--surface-muted:#EDEDEF;
+    --text-primary:#18181B;--text-secondary:#46474D;--text-muted:#74757C;--border:#E5E5E8;
+    --accent:#1F2329;--accent-text:#1F2329;--accent-soft:#E9EAEC;--on-accent:#FFFFFF;
+    --success:#157F54;--success-soft:#E0F1E9;--warning:#8A5D0C;--warning-soft:#F4ECD5;
+    --error:#C0392B;--error-soft:#F8E4E1;--info:#2C6FB0;--info-soft:#E2EDF8;
+    --font-head:'Bricolage Grotesque';--head-weight:700;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>FarmwiseAI — five palette directions</h1>
+    <p>All light-theme, all WCAG-AA verified, all built on the same shape &amp; depth language: macOS radii, layered soft shadows, floating cards (note the gapped sidebar), a glass overlay on the map, Geist for numbers, and bouncy spring hover (hover the buttons, nav items, and bars). Only the colour story and heading typeface differ.</p>
+    <span class="note">Disposable preview · no token files written yet · lives in <code>_preview/</code></span>
+  </div>
+
+  <!-- ============ 2 · MULBERRY ============ -->
+  <section class="palette p-mulberry">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div><h2>1 · Mulberry</h2><div class="sub">A sophisticated wine/berry accent — distinctly <em>not</em> the banned purple/blue. Editorial, premium, memorable; the boldest brand signal.</div></div>
+      <div class="head-font-tag">Headings: Fraunces</div>
+    </div>
+    <div class="frame">
+      <aside class="sidebar float-card">
+        <div class="brandrow"><div class="logo">F</div><div class="brandname">Farmwise</div></div>
+        <nav class="nav">
+          <a class="active" href="#"><span class="dot"></span>Overview</a>
+          <a href="#"><span class="dot"></span>Parcels</a>
+          <a href="#"><span class="dot"></span>Imagery</a>
+          <a href="#"><span class="dot"></span>Reports</a>
+          <a href="#"><span class="dot"></span>Settings</a>
+        </nav>
+      </aside>
+      <div class="main">
+        <div class="topbar"><h3>Field overview</h3>
+          <div style="display:flex;gap:10px"><button class="btn btn-ghost">Export</button><button class="btn btn-primary">New survey</button></div>
+        </div>
+        <div class="metrics">
+          <div class="metric float-card"><div class="label">Parcels mapped</div><div class="num">12,480</div><div class="delta up">▲ 8.2%</div></div>
+          <div class="metric float-card"><div class="label">Avg yield index</div><div class="num">0.74</div><div class="delta up">▲ 0.03</div></div>
+          <div class="metric float-card"><div class="label">Anomalies</div><div class="num">37</div><div class="delta down">▼ 11%</div></div>
+        </div>
+        <div class="row2">
+          <div class="chartcard float-card"><div class="ttl">Vegetation trend</div>
+            <div class="bars"><span style="height:55%"></span><span style="height:70%"></span><span style="height:48%"></span><span style="height:82%"></span><span style="height:64%"></span><span style="height:90%"></span><span style="height:73%"></span></div>
+            <div class="badges"><span class="badge b-suc">Healthy 82%</span><span class="badge b-warn">Stress 12%</span><span class="badge b-err">Critical 6%</span></div>
+          </div>
+          <div class="chartcard float-card mapcard">
+            <div class="mapveins"></div><div class="pin"></div>
+            <div class="glass"><div><div class="gt">Parcel #A-2207</div><div class="gs">4.8 ha · NDVI 0.71</div></div><button class="btn btn-primary" style="padding:7px 13px">Inspect</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div>
+        <div class="swatches">
+          <div class="sw"><div class="chip" style="background:#9B2D55"></div><div class="nm">accent</div><div class="hex">#9B2D55</div></div>
+          <div class="sw"><div class="chip" style="background:#7E2244"></div><div class="nm">accent-hover</div><div class="hex">#7E2244</div></div>
+          <div class="sw"><div class="chip" style="background:#F7F4F5"></div><div class="nm">canvas</div><div class="hex">#F7F4F5</div></div>
+          <div class="sw"><div class="chip" style="background:#1E1A1C"></div><div class="nm">ink</div><div class="hex">#1E1A1C</div></div>
+          <div class="sw"><div class="chip" style="background:#2E7D4F"></div><div class="nm">success</div><div class="hex">#2E7D4F</div></div>
+          <div class="sw"><div class="chip" style="background:#8A5D0C"></div><div class="nm">warning</div><div class="hex">#8A5D0C</div></div>
+          <div class="sw"><div class="chip" style="background:#C0392B"></div><div class="nm">error</div><div class="hex">#C0392B</div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="big">A brand you remember.</div>
+        <div class="body">Berry + paper + Fraunces reads like a premium print publication. Stands apart from every blue-gradient agritech tool on the market.</div>
+        <div class="data">98.6% · 1,204 ha · ₹2.4M</div>
+        <div class="lbl">Geist · tabular figures</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · MERIDIAN ============ -->
+  <section class="palette p-meridian">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div><h2>2 · Meridian</h2><div class="sub">Technical &amp; precise — cool neutrals, deep emerald-teal accent. Linear-grade engineering credibility; great on maps &amp; data.</div></div>
+      <div class="head-font-tag">Headings: Bricolage Grotesque</div>
+    </div>
+    <div class="frame">
+      <aside class="sidebar float-card">
+        <div class="brandrow"><div class="logo">F</div><div class="brandname">Farmwise</div></div>
+        <nav class="nav">
+          <a class="active" href="#"><span class="dot"></span>Overview</a>
+          <a href="#"><span class="dot"></span>Parcels</a>
+          <a href="#"><span class="dot"></span>Imagery</a>
+          <a href="#"><span class="dot"></span>Reports</a>
+          <a href="#"><span class="dot"></span>Settings</a>
+        </nav>
+      </aside>
+      <div class="main">
+        <div class="topbar"><h3>Field overview</h3>
+          <div style="display:flex;gap:10px"><button class="btn btn-ghost">Export</button><button class="btn btn-primary">New survey</button></div>
+        </div>
+        <div class="metrics">
+          <div class="metric float-card"><div class="label">Parcels mapped</div><div class="num">12,480</div><div class="delta up">▲ 8.2%</div></div>
+          <div class="metric float-card"><div class="label">Avg yield index</div><div class="num">0.74</div><div class="delta up">▲ 0.03</div></div>
+          <div class="metric float-card"><div class="label">Anomalies</div><div class="num">37</div><div class="delta down">▼ 11%</div></div>
+        </div>
+        <div class="row2">
+          <div class="chartcard float-card"><div class="ttl">Vegetation trend</div>
+            <div class="bars"><span style="height:55%"></span><span style="height:70%"></span><span style="height:48%"></span><span style="height:82%"></span><span style="height:64%"></span><span style="height:90%"></span><span style="height:73%"></span></div>
+            <div class="badges"><span class="badge b-suc">Healthy 82%</span><span class="badge b-warn">Stress 12%</span><span class="badge b-err">Critical 6%</span></div>
+          </div>
+          <div class="chartcard float-card mapcard">
+            <div class="mapveins"></div><div class="pin"></div>
+            <div class="glass"><div><div class="gt">Parcel #A-2207</div><div class="gs">4.8 ha · NDVI 0.71</div></div><button class="btn btn-primary" style="padding:7px 13px">Inspect</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div>
+        <div class="swatches">
+          <div class="sw"><div class="chip" style="background:#0B7256"></div><div class="nm">accent</div><div class="hex">#0B7256</div></div>
+          <div class="sw"><div class="chip" style="background:#095C45"></div><div class="nm">accent-hover</div><div class="hex">#095C45</div></div>
+          <div class="sw"><div class="chip" style="background:#F6F7F9"></div><div class="nm">canvas</div><div class="hex">#F6F7F9</div></div>
+          <div class="sw"><div class="chip" style="background:#14181F"></div><div class="nm">ink</div><div class="hex">#14181F</div></div>
+          <div class="sw"><div class="chip" style="background:#157F54"></div><div class="nm">success</div><div class="hex">#157F54</div></div>
+          <div class="sw"><div class="chip" style="background:#8A6100"></div><div class="nm">warning</div><div class="hex">#8A6100</div></div>
+          <div class="sw"><div class="chip" style="background:#C0392B"></div><div class="nm">error</div><div class="hex">#C0392B</div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="big">Precision at scale.</div>
+        <div class="body">Bricolage Grotesque gives headings a confident, modern-grotesque edge — assertive without shouting. Figtree keeps the body calm.</div>
+        <div class="data">98.6% · 1,204 ha · ₹2.4M</div>
+        <div class="lbl">Geist · tabular figures</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 · HARBOR ============ -->
+  <section class="palette p-harbor">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div><h2>3 · Harbor</h2><div class="sub">Deep navy-petrol blue — institutional, dependable, enterprise-grade. Blue used as a considered deep tone, never the generic cornflower gradient.</div></div>
+      <div class="head-font-tag">Headings: Bricolage Grotesque</div>
+    </div>
+    <div class="frame">
+      <aside class="sidebar float-card">
+        <div class="brandrow"><div class="logo">F</div><div class="brandname">Farmwise</div></div>
+        <nav class="nav">
+          <a class="active" href="#"><span class="dot"></span>Overview</a>
+          <a href="#"><span class="dot"></span>Parcels</a>
+          <a href="#"><span class="dot"></span>Imagery</a>
+          <a href="#"><span class="dot"></span>Reports</a>
+          <a href="#"><span class="dot"></span>Settings</a>
+        </nav>
+      </aside>
+      <div class="main">
+        <div class="topbar"><h3>Field overview</h3>
+          <div style="display:flex;gap:10px"><button class="btn btn-ghost">Export</button><button class="btn btn-primary">New survey</button></div>
+        </div>
+        <div class="metrics">
+          <div class="metric float-card"><div class="label">Parcels mapped</div><div class="num">12,480</div><div class="delta up">▲ 8.2%</div></div>
+          <div class="metric float-card"><div class="label">Avg yield index</div><div class="num">0.74</div><div class="delta up">▲ 0.03</div></div>
+          <div class="metric float-card"><div class="label">Anomalies</div><div class="num">37</div><div class="delta down">▼ 11%</div></div>
+        </div>
+        <div class="row2">
+          <div class="chartcard float-card"><div class="ttl">Vegetation trend</div>
+            <div class="bars"><span style="height:55%"></span><span style="height:70%"></span><span style="height:48%"></span><span style="height:82%"></span><span style="height:64%"></span><span style="height:90%"></span><span style="height:73%"></span></div>
+            <div class="badges"><span class="badge b-suc">Healthy 82%</span><span class="badge b-warn">Stress 12%</span><span class="badge b-err">Critical 6%</span></div>
+          </div>
+          <div class="chartcard float-card mapcard">
+            <div class="mapveins"></div><div class="pin"></div>
+            <div class="glass"><div><div class="gt">Parcel #A-2207</div><div class="gs">4.8 ha · NDVI 0.71</div></div><button class="btn btn-primary" style="padding:7px 13px">Inspect</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div>
+        <div class="swatches">
+          <div class="sw"><div class="chip" style="background:#15577D"></div><div class="nm">accent</div><div class="hex">#15577D</div></div>
+          <div class="sw"><div class="chip" style="background:#0F4262"></div><div class="nm">accent-hover</div><div class="hex">#0F4262</div></div>
+          <div class="sw"><div class="chip" style="background:#F4F6F8"></div><div class="nm">canvas</div><div class="hex">#F4F6F8</div></div>
+          <div class="sw"><div class="chip" style="background:#131A21"></div><div class="nm">ink</div><div class="hex">#131A21</div></div>
+          <div class="sw"><div class="chip" style="background:#157F54"></div><div class="nm">success</div><div class="hex">#157F54</div></div>
+          <div class="sw"><div class="chip" style="background:#8A5D0C"></div><div class="nm">warning</div><div class="hex">#8A5D0C</div></div>
+          <div class="sw"><div class="chip" style="background:#C0392B"></div><div class="nm">error</div><div class="hex">#C0392B</div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="big">Trusted infrastructure.</div>
+        <div class="body">A deep, serious blue that signals reliability for government and enterprise clients — without slipping into the SaaS-blue gradient cliché.</div>
+        <div class="data">98.6% · 1,204 ha · ₹2.4M</div>
+        <div class="lbl">Geist · tabular figures</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 · TERRA INK ============ -->
+  <section class="palette p-terra">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div><h2>4 · Terra Ink</h2><div class="sub">Editorial &amp; grounded — warm paper, soil-toned terracotta accent. Confident, magazine-like, soil-close without farm clichés.</div></div>
+      <div class="head-font-tag">Headings: Fraunces</div>
+    </div>
+    <div class="frame">
+      <aside class="sidebar float-card">
+        <div class="brandrow"><div class="logo">F</div><div class="brandname">Farmwise</div></div>
+        <nav class="nav">
+          <a class="active" href="#"><span class="dot"></span>Overview</a>
+          <a href="#"><span class="dot"></span>Parcels</a>
+          <a href="#"><span class="dot"></span>Imagery</a>
+          <a href="#"><span class="dot"></span>Reports</a>
+          <a href="#"><span class="dot"></span>Settings</a>
+        </nav>
+      </aside>
+      <div class="main">
+        <div class="topbar"><h3>Field overview</h3>
+          <div style="display:flex;gap:10px"><button class="btn btn-ghost">Export</button><button class="btn btn-primary">New survey</button></div>
+        </div>
+        <div class="metrics">
+          <div class="metric float-card"><div class="label">Parcels mapped</div><div class="num">12,480</div><div class="delta up">▲ 8.2%</div></div>
+          <div class="metric float-card"><div class="label">Avg yield index</div><div class="num">0.74</div><div class="delta up">▲ 0.03</div></div>
+          <div class="metric float-card"><div class="label">Anomalies</div><div class="num">37</div><div class="delta down">▼ 11%</div></div>
+        </div>
+        <div class="row2">
+          <div class="chartcard float-card"><div class="ttl">Vegetation trend</div>
+            <div class="bars"><span style="height:55%"></span><span style="height:70%"></span><span style="height:48%"></span><span style="height:82%"></span><span style="height:64%"></span><span style="height:90%"></span><span style="height:73%"></span></div>
+            <div class="badges"><span class="badge b-suc">Healthy 82%</span><span class="badge b-warn">Stress 12%</span><span class="badge b-err">Critical 6%</span></div>
+          </div>
+          <div class="chartcard float-card mapcard">
+            <div class="mapveins"></div><div class="pin"></div>
+            <div class="glass"><div><div class="gt">Parcel #A-2207</div><div class="gs">4.8 ha · NDVI 0.71</div></div><button class="btn btn-primary" style="padding:7px 13px">Inspect</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div>
+        <div class="swatches">
+          <div class="sw"><div class="chip" style="background:#B4502E"></div><div class="nm">accent</div><div class="hex">#B4502E</div></div>
+          <div class="sw"><div class="chip" style="background:#97401F"></div><div class="nm">accent-text</div><div class="hex">#97401F</div></div>
+          <div class="sw"><div class="chip" style="background:#F7F4EE"></div><div class="nm">canvas</div><div class="hex">#F7F4EE</div></div>
+          <div class="sw"><div class="chip" style="background:#1C1A17"></div><div class="nm">ink</div><div class="hex">#1C1A17</div></div>
+          <div class="sw"><div class="chip" style="background:#2E7D4F"></div><div class="nm">success</div><div class="hex">#2E7D4F</div></div>
+          <div class="sw"><div class="chip" style="background:#8A5D0C"></div><div class="nm">warning</div><div class="hex">#8A5D0C</div></div>
+          <div class="sw"><div class="chip" style="background:#C0392B"></div><div class="nm">error</div><div class="hex">#C0392B</div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="big">Land, measured.</div>
+        <div class="body">Figtree carries the body — friendly, legible, neutral. Fraunces gives headings an editorial, almost printed authority.</div>
+        <div class="data">98.6% · 1,204 ha · ₹2.4M</div>
+        <div class="lbl">Geist · tabular figures</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6 · GRAPHITE ============ -->
+  <section class="palette p-graphite">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div><h2>5 · Graphite</h2><div class="sub">Restrained monochrome — ink as the only "accent," colour reserved for status. Vercel/Linear-mono calm; lets your data &amp; imagery be the colour.</div></div>
+      <div class="head-font-tag">Headings: Bricolage Grotesque</div>
+    </div>
+    <div class="frame">
+      <aside class="sidebar float-card">
+        <div class="brandrow"><div class="logo">F</div><div class="brandname">Farmwise</div></div>
+        <nav class="nav">
+          <a class="active" href="#"><span class="dot"></span>Overview</a>
+          <a href="#"><span class="dot"></span>Parcels</a>
+          <a href="#"><span class="dot"></span>Imagery</a>
+          <a href="#"><span class="dot"></span>Reports</a>
+          <a href="#"><span class="dot"></span>Settings</a>
+        </nav>
+      </aside>
+      <div class="main">
+        <div class="topbar"><h3>Field overview</h3>
+          <div style="display:flex;gap:10px"><button class="btn btn-ghost">Export</button><button class="btn btn-primary">New survey</button></div>
+        </div>
+        <div class="metrics">
+          <div class="metric float-card"><div class="label">Parcels mapped</div><div class="num">12,480</div><div class="delta up">▲ 8.2%</div></div>
+          <div class="metric float-card"><div class="label">Avg yield index</div><div class="num">0.74</div><div class="delta up">▲ 0.03</div></div>
+          <div class="metric float-card"><div class="label">Anomalies</div><div class="num">37</div><div class="delta down">▼ 11%</div></div>
+        </div>
+        <div class="row2">
+          <div class="chartcard float-card"><div class="ttl">Vegetation trend</div>
+            <div class="bars"><span style="height:55%"></span><span style="height:70%"></span><span style="height:48%"></span><span style="height:82%"></span><span style="height:64%"></span><span style="height:90%"></span><span style="height:73%"></span></div>
+            <div class="badges"><span class="badge b-suc">Healthy 82%</span><span class="badge b-warn">Stress 12%</span><span class="badge b-err">Critical 6%</span></div>
+          </div>
+          <div class="chartcard float-card mapcard">
+            <div class="mapveins"></div><div class="pin"></div>
+            <div class="glass"><div><div class="gt">Parcel #A-2207</div><div class="gs">4.8 ha · NDVI 0.71</div></div><button class="btn btn-primary" style="padding:7px 13px">Inspect</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div>
+        <div class="swatches">
+          <div class="sw"><div class="chip" style="background:#1F2329"></div><div class="nm">accent/ink</div><div class="hex">#1F2329</div></div>
+          <div class="sw"><div class="chip" style="background:#F6F6F7"></div><div class="nm">canvas</div><div class="hex">#F6F6F7</div></div>
+          <div class="sw"><div class="chip" style="background:#EDEDEF"></div><div class="nm">muted</div><div class="hex">#EDEDEF</div></div>
+          <div class="sw"><div class="chip" style="background:#157F54"></div><div class="nm">success</div><div class="hex">#157F54</div></div>
+          <div class="sw"><div class="chip" style="background:#8A5D0C"></div><div class="nm">warning</div><div class="hex">#8A5D0C</div></div>
+          <div class="sw"><div class="chip" style="background:#C0392B"></div><div class="nm">error</div><div class="hex">#C0392B</div></div>
+          <div class="sw"><div class="chip" style="background:#2C6FB0"></div><div class="nm">info</div><div class="hex">#2C6FB0</div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="big">Let the data speak.</div>
+        <div class="body">A near-neutral system where status colour and your map imagery provide all the hue. Maximally professional, impossible to call "generic AI."</div>
+        <div class="data">98.6% · 1,204 ha · ₹2.4M</div>
+        <div class="lbl">Geist · tabular figures</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
